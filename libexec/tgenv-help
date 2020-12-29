@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -uo pipefail;
+
+echo 'Usage: tgenv <command> [<options>]
+
+Commands:
+   install       Install a specific version of Terragrunt
+   use           Switch a version to use
+   uninstall     Uninstall a specific version of Terragrunt
+   list          List all installed versions
+   list-remote   List all installable versions
+';
+
+exit 0;

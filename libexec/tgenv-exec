@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+#
+# Summary: Run an executable with the selected Terragrunt version
+#
+# Usage: tgenv exec <command> [arg1 arg2...]
+#
+# Runs an executable by first preparing PATH so that the selected Terragrunt
+# version's `bin' directory is at the front.
+#
+# For example, if the currently selected Terragrunt version is 0.7.0:
+#   tgenv exec plan
+#
+# is equivalent to:
+#   PATH="$TGENV_ROOT/versions/0.7.0/bin:$PATH" terragrunt plan
+
+set -uo pipefail;
+
+####################################
+# Ensure we can execute standalone #
+####################################
+
+function early_death() {
+  echo "[FATAL] ${0}: ${1}" >&2;
+  exit 1;
+};
+
+if [ -z "${TGENV_ROOT:-""}" ]; then
+  # http://stackoverflow.com/questions/1055671/how-can-i-get-the-behavior-of-gnus-readlink-f-on-a-mac
+  readlink_f() {
+    local target_file="${1}";
+    local file_name;
+
+    while [ "${target_file}" != "" ]; do
+      cd "$(dirname ${target_file})" || early_death "Failed to 'cd \$(dirname ${target_file})' while trying to determine TGENV_ROOT";
+      file_name="$(basename "${target_file}")" || early_death "Failed to 'basename \"${target_file}\"' while trying to determine TGENV_ROOT";
+      target_file="$(readlink "${file_name}")";
+    done;
+
+    echo "$(pwd -P)/${file_name}";
+  };
+
+  TGENV_ROOT="$(cd "$(dirname "$(readlink_f "${0}")")/.." && pwd)";
+  [ -n "${TGENV_ROOT}" ] || early_death "Failed to 'cd \"\$(dirname \"\$(readlink_f \"${0}\")\")/..\" && pwd' while trying to determine TGENV_ROOT";
+else
+  TGENV_ROOT="${TGENV_ROOT%/}";
+fi;
+export TGENV_ROOT;
+
+if [ -n "${TGENV_HELPERS:-""}" ]; then
+  log 'debug' 'TGENV_HELPERS is set, not sourcing helpers again';
+else
+  [ "${TGENV_DEBUG:-0}" -gt 0 ] && echo "[DEBUG] Sourcing helpers from ${TGENV_ROOT}/lib/helpers.sh";
+  if source "${TGENV_ROOT}/lib/helpers.sh"; then
+    log 'debug' 'Helpers sourced successfully';
+  else
+    early_death "Failed to source helpers from ${TGENV_ROOT}/lib/helpers.sh";
+  fi;
+fi;
+
+# Ensure libexec and bin are in $PATH
+for dir in libexec bin; do
+  case ":${PATH}:" in
+    *:${TGENV_ROOT}/${dir}:*) log 'debug' "\$PATH already contains '${TGENV_ROOT}/${dir}', not adding it again";;
+    *)
+      log 'debug' "\$PATH does not contain '${TGENV_ROOT}/${dir}', prepending and exporting it now";
+      export PATH="${TGENV_ROOT}/${dir}:${PATH}";
+      ;;
+  esac;
+done;
+
+#####################
+# Begin Script Body #
+#####################
+
+log 'debug' 'Getting version from tgenv-version-name';
+TGENV_VERSION="$(tgenv-version-name)" \
+  && log 'debug' "TGENV_VERSION is ${TGENV_VERSION}" \
+  || {
+    # Errors will be logged from tgenv-version name,
+    # we don't need to trouble STDERR with repeat information here
+    log 'debug' 'Failed to get version from tgenv-version-name';
+    exit 1;
+  };
+export TGENV_VERSION;
+
+if [ ! -d "${TGENV_ROOT}/versions/${TGENV_VERSION}" ]; then
+  if [ "${TGENV_AUTO_INSTALL:-true}" == "true" ]; then
+    log 'info' "version '${TGENV_VERSION}' is not installed (set by $(tgenv-version-file)). Installing now as TGENV_AUTO_INSTALL==true";
+    tgenv-install;
+  else
+    log 'error' "version '${TGENV_VERSION}' was requested, but not installed and TGENV_AUTO_INSTALL is not 'true'";
+  fi;
+fi;
+
+TG_BIN_PATH="${TGENV_ROOT}/versions/${TGENV_VERSION}/terragrunt";
+export PATH="${TG_BIN_PATH}:${PATH}";
+log 'debug' "TG_BIN_PATH added to PATH: ${TG_BIN_PATH}";
+log 'debug' "Executing: ${TG_BIN_PATH} $@";
+
+exec "${TG_BIN_PATH}" "$@" \
+  || log 'error' "Failed to execute: ${TG_BIN_PATH} $*";
+
+exit 0;

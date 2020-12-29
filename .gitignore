@@ -1,0 +1,7 @@
+versions/
+version
+.terragrunt-version
+bin/terragrunt-*
+/use-gnupg
+/use-gpgv
+.*.swp
