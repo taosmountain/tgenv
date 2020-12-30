@@ -14,4 +14,4 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v2
     - name: Test scripts
-      run: ./test/run.sh
+      run: make test
