@@ -1,8 +1,22 @@
+> Ported form [tfutils/tfenv](https://github.com/tfutils/tfenv/tree/0494129a4ad5dfde0cdd9a68ce54b6c7a53afc3f), modified to work with terragrunt.
+
 # tgenv
 
-> Forked form [tfutils/tfenv](https://github.com/tfutils/tfenv/tree/0494129a4ad5dfde0cdd9a68ce54b6c7a53afc3f), modified to work with terragrunt.
-
 Terragrunt version manager inspired by [rbenv](https://github.com/rbenv/rbenv)
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Support](#support)
+- [Installation](#installation)
+- [Usage](#usage)
+- [.terragrunt-version file](#terragrunt-version-file)
+- [Upgrading](#upgrading)
+- [Uninstalling](#uninstalling)
+- [LICENSES](#licenses)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Support
 
@@ -16,12 +30,13 @@ Currently tgenv supports the following OSes
 
 ## Installation
 
-### Manual
-
 1. Check out tgenv into any path (here is `${HOME}/.tgenv`)
 
   ```console
   $ git clone https://github.com/taosmountain/tgenv.git ~/.tgenv
+  $
+  $ # Or clone a specific version
+  $ git clone 0.1.0 https://github.com/taosmountain/tgenv.git ~/.tgenv
   ```
 
 2. Add `~/.tgenv/bin` to your `$PATH` any way you like
@@ -63,50 +78,14 @@ If a parameter is passed, available options:
 
 ```console
 $ tgenv install
-$ tgenv install 0.7.0
+$ tgenv install 0.24.0
 $ tgenv install latest
-$ tgenv install latest:^0.8
-$ tgenv install min-required
+$ tgenv install latest:^0.25
 ```
-
-<!-- If `shasum` is present in the path, tgenv will verify the download against Hashicorp's published sha256 hash.
-If [keybase](https://keybase.io/) is available in the path it will also verify the signature for those published hashes using Hashicorp's published public key.
-
-You can opt-in to using GnuPG tools for PGP signature verification if keybase is not available:
-
-```console
-$ echo 'trust-tgenv: yes' > ~/.tgenv/use-gpgv
-$ tgenv install
-```
-
-The `trust-tgenv` directive means that verification uses a copy of the
-Hashicorp OpenPGP key found in the tgenv repository.  Skipping that directive
-means that the Hashicorp key must be in the existing default trusted keys.
-Use the file `~/.tgenv/use-gnupg` to instead invoke the full `gpg` tool and
-see web-of-trust status; beware that a lack of trust path will not cause a
-validation failure. -->
 
 #### .terragrunt-version
 
 If you use a [.terragrunt-version file](#terragrunt-version-file), `tgenv install` (no argument) will install the version written in it.
-
-<!-- #### min-required
-
-Please note that we don't do semantic version range parsing but use first ever found version as the candidate for minimally required one. It is up to the user to keep the definition reasonable. I.e.
-
-```terragrunt
-// this will detect 0.12.3
-terragrunt {
-  required_version  = "<0.12.3, >= 0.10.0"
-}
-```
-
-```terragrunt
-// this will detect 0.10.0
-terragrunt {
-  required_version  = ">= 0.10.0, <0.12.3"
-}
-``` -->
 
 ### Environment Variables
 
@@ -119,7 +98,7 @@ String (Default: amd64)
 Specify architecture. Architecture other than the default amd64 can be specified with the `TGENV_ARCH` environment variable
 
 ```console
-TGENV_ARCH=arm tgenv install 0.7.9
+TGENV_ARCH=arm tgenv install 0.25.5
 ```
 
 ##### `TGENV_AUTO_INSTALL`
@@ -287,7 +266,6 @@ The syslog tag to specify when using SYSLOG type logging.
 Defaults to the PID of the calling process.
 
 
-
 ### tgenv use [version]
 
 Switch a version to use
@@ -302,10 +280,9 @@ If no parameter is passed, the version to use is resolved automatically via .ter
 
 ```console
 $ tgenv use
-$ tgenv use min-required
-$ tgenv use 0.7.0
+$ tgenv use 0.24.0
 $ tgenv use latest
-$ tgenv use latest:^0.8
+$ tgenv use latest:^0.25
 ```
 
 ### tgenv uninstall &lt;version>
@@ -315,9 +292,9 @@ Uninstall a specific version of Terragrunt
 `latest:<regex>` is a syntax to uninstall latest version matching regex (used by grep -e)
 
 ```console
-$ tgenv uninstall 0.7.0
+$ tgenv uninstall 0.24.0
 $ tgenv uninstall latest
-$ tgenv uninstall latest:^0.8
+$ tgenv uninstall latest:^0.25
 ```
 
 ### tgenv list
@@ -326,15 +303,12 @@ List installed versions
 
 ```console
 % tgenv list
-* 0.10.7 (set by /opt/tgenv/version)
-  0.9.0-beta2
-  0.8.8
-  0.8.4
-  0.7.0
-  0.7.0-rc4
-  0.6.16
-  0.6.2
-  0.6.1
+* 0.26.7 (set by /opt/tgenv/version)
+  0.26.7
+  0.24.0
+  0.23.40
+  0.22.5
+  0.22.4
 ```
 
 ### tgenv list-remote
@@ -343,24 +317,22 @@ List installable versions
 
 ```console
 % tgenv list-remote
-0.9.0-beta2
-0.9.0-beta1
-0.8.8
-0.8.7
-0.8.6
-0.8.5
-0.8.4
-0.8.3
-0.8.2
-0.8.1
-0.8.0
-0.8.0-rc3
-0.8.0-rc2
-0.8.0-rc1
-0.8.0-beta2
-0.8.0-beta1
-0.7.13
-0.7.12
+0.26.3
+0.26.2
+0.26.0
+0.25.5
+0.25.4
+0.25.3
+0.25.2
+0.25.1
+0.25.0
+0.24.4
+0.24.3
+0.24.2
+0.24.1
+0.24.0
+0.23.40
+0.23.39
 ...
 ```
 
@@ -370,23 +342,23 @@ If you put a `.terragrunt-version` file on your project root, or in your home di
 
 ```console
 $ cat .terragrunt-version
-0.6.16
+0.26.6
 
 $ terragrunt --version
-terragrunt version v0.6.16
+terragrunt version v0.26.6
 
 Your version of Terragrunt is out of date! The latest version
-is 0.7.3. You can update by downloading from www.terragrunt.io
+is 0.26.7. You can update by downloading from www.terragrunt.io
 
-$ echo 0.7.3 > .terragrunt-version
-
-$ terragrunt --version
-terragrunt version v0.7.3
-
-$ echo latest:^0.8 > .terragrunt-version
+$ echo 0.26.7 > .terragrunt-version
 
 $ terragrunt --version
-terragrunt version v0.8.8
+terragrunt version v0.26.7
+
+$ echo latest:^0.25 > .terragrunt-version
+
+$ terragrunt --version
+terragrunt version v0.25.5
 ```
 
 ## Upgrading
