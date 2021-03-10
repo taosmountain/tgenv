@@ -68,9 +68,8 @@ done;
 [[ -x "${TGENV_ROOT}/versions" && -r "${TGENV_ROOT}/versions" ]] \
   || log 'error' "tgenv versions directory is inaccessible: ${TGENV_ROOT}/versions";
 
-version_name="$(tgenv-version-name)" \
-  && log 'debug' "tgenv-version-name reported: ${version_name}" \
-  || log 'error' "tgenv-version-name failed";
+version_name="$(tgenv-version-name 2>/dev/null || true)" \
+  && log 'debug' "tgenv-version-name reported: ${version_name}";
 export version_name;
 
 version_file="$(tgenv-version-file)" \
@@ -78,9 +77,13 @@ version_file="$(tgenv-version-file)" \
   || log 'error' "tgenv-version-file failed";
 export version_file;
 
+# Register for whether a default terraform version has yet been set
+declare -i default_set=0;
+
 print_version () {
   if [ "${1}" == "${version_name}" ]; then
     echo "* ${1} (set by ${version_file})";
+    default_set=1
   else
     echo "  ${1}";
   fi;
@@ -97,3 +100,9 @@ log 'debug' 'Printing versions...';
 for local_version in ${local_versions[@]}; do
   print_version "${local_version}";
 done;
+
+log 'debug' "default_set == ${default_set}"
+
+[ "${default_set}" -eq 0 ] && log 'info' "No default set. Set with 'tgenv use <version>'";
+
+exit 0;
