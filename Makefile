@@ -1,4 +1,5 @@
-﻿test:
+﻿.PHONY: test
+test:
 	./test/run.sh
 
 update-changelog:
