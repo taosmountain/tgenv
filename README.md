@@ -376,7 +376,7 @@ $ rm -rf /some/path/to/tgenv
 ## LICENSES
 
 - [tfenv]
-  - tgenv uses a majority of tgenv's source code.
+  - tgenv uses a majority of tfenv's source code.
 - [rbenv]
   - tgenv partially uses rbenv's source code
 

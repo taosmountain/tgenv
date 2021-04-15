@@ -77,7 +77,7 @@ version="$(tgenv-list-remote | grep -e "${regex}" | head -n 1)";
 
 dst_path="${TGENV_ROOT}/versions/${version}";
 if [ -f "${dst_path}/terragrunt" ]; then
-  echo "Terraform v${version} is already installed";
+  echo "Terragrunt v${version} is already installed";
   exit 0;
 fi;
 
@@ -114,7 +114,7 @@ tarball_name="terragrunt_${os}";
 
 # shasums_name="terragrunt_${version}_SHA256SUMS";
 
-log 'info' "Installing Terraform v${version}";
+log 'info' "Installing Terragrunt v${version}";
 
 # # Create a local temporary directory for downloads
 # download_tmp="$(mktemp -d tgenv_download.XXXXXX)" || log 'error' "Unable to create temporary download directory in $(pwd)";
